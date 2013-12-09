@@ -111,8 +111,7 @@ public class TreeNode{
 		
 		if(current_link.isLeaf()){
 			if(!current_link.isEmpty()) {
-				value = current_link.keys.get(current_link.keys.size() -1);
-				current_link.keys.remove(current_link.keys.size() - 1);
+				value = current_link.keys.remove(current_link.keys.size() -1);
 				if(current_link.fillStatus() == -1) {
 					repairLeaf(index);
 				}
@@ -123,7 +122,7 @@ public class TreeNode{
 				value = current_link.getPredecessor(next_link);
 			}
 		}
-		System.out.println("Found Predecessor - " + value);
+		System.out.println(" Found Predecessor - " + value);
 		return value;
 	}  
 
@@ -372,12 +371,15 @@ public class TreeNode{
 
 	public void repairLeaf(int index){
 		TreeNode right, left;
-
 		boolean hasRight = (index + 1) < links.size();
 		boolean hasLeft = (index - 1) > -1;
 		int right_fill = -1;
 		int left_fill = -1;
 		
+		if(links.size() == 2) {
+			repairSingle();
+			return;
+		}
 		if(hasRight) {
 			right = links.get(index + 1);
 			right_fill = right.fillStatus();
@@ -397,6 +399,23 @@ public class TreeNode{
 		} else if(hasLeft && left_fill == 0) {
 			mergeLeft(index);
 		}
+	}
+	
+	public void repairSingle() {
+		TreeNode left, right;
+			left = links.get(0);
+			right = links.get(1);
+		String w;
+		while(!left.keys.isEmpty()) {
+			w = left.keys.remove(left.keys.size() - 1);
+			keys.add(0,w);
+		}
+		
+		while(!right.keys.isEmpty()) {
+			w = right.keys.remove(0);
+			keys.add(w);
+		}
+		links.clear();
 	}
 
 	public void reapairInternal(int index){

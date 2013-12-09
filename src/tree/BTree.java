@@ -130,7 +130,7 @@ public class BTree {
 			if(root.hasPredecessor(value_index)) {
 				predecessor = root.getPredecessor(value_index);
 				root.keys.set(value_index, predecessor);  
-				root.removeCopy(value_index);
+				//root.removeCopy(value_index);
 			} else {
 				root.links.remove(value_index);
 				root.keys.remove(value_index);
@@ -158,11 +158,20 @@ public class BTree {
 		} else{
 			value_index = valueNode.keys.indexOf(value);
 			predecessor = valueNode.getPredecessor(value_index);
+			if(valueNode.fillStatus() == -1) {
+				//repairTree(node);
+				repairTree(valueParent);
+			}
 			if(predecessor == null) {
 				System.out.println("Null Predecessor for - " + value);
 			}
+			if(!valueNode.keys.contains(value)) {
+				valueParent = findParent(value, node);
+				valueNode = valueParent.getLinked(value);
+				value_index = valueNode.keys.indexOf(value);
+			}
 			valueNode.keys.set(value_index, predecessor);  
-			valueNode.removeCopy(value_index);
+			//valueNode.removeCopy(value_index);
 		}
 		if(valueParent.keys.equals(root.keys)) {
 			return;
