@@ -39,8 +39,8 @@ public class TreeNode{
 	
 	public boolean hasPredecessor(int index) {
 		boolean to_return = false;
-		if(index - 1 < links.size() && index - 1 > 0) {
-			if(links.get(index - 1).isEmpty()) {
+		if(index < links.size() && index > -1) {
+			if(links.get(index).isEmpty()) {
 				to_return = false;
 			} else {
 				to_return = true;
@@ -124,7 +124,27 @@ public class TreeNode{
 		}
 		System.out.println(" Found Predecessor - " + value);
 		return value;
-	}  
+	}
+	
+	public String rootPredecessor(int index) {
+		int next_link;
+		TreeNode current_link;
+		String value = null; //Did we find??
+		current_link = links.get(index);
+		
+		if(current_link.isLeaf()){
+			if(!current_link.isEmpty()) {
+				value = current_link.keys.remove(current_link.keys.size() -1);
+			} 
+		} else {
+			next_link = current_link.links.size() -1;
+			if(next_link > -1) {
+				value = current_link.getPredecessor(next_link);
+			}
+		}
+		System.out.println(" Found Root Predecessor - " + value);
+		return value;
+	}
 
 	public void splitRoot(){
 		TreeNode left, right;
@@ -348,27 +368,6 @@ public class TreeNode{
 		links.remove(index);
 	}
 
-	public void removeCopy(int index){
-		int next_link;
-		TreeNode current_link;
-		String value;
-
-		current_link = links.get(index);
-		if(current_link.isLeaf()){
-			value = current_link.keys.remove(current_link.keys.size() -1);
-			System.out.println("Link Copy Removed: " + value);
-			if(current_link.fillStatus() == -1){
-				repairLeaf(index);
-			}
-		} else{
-			next_link = current_link.links.size() -1;
-			current_link.removeCopy(next_link);
-			if(current_link.fillStatus() == -1){
-				reapairInternal(index);
-			}
-		}
-	}
-
 	public void repairLeaf(int index){
 		TreeNode right, left;
 		boolean hasRight = (index + 1) < links.size();
@@ -390,7 +389,15 @@ public class TreeNode{
 			left_fill = left.fillStatus();
 		}
 		
-		if(hasRight && right_fill > 0) {
+		if(index >= keys.size()) {
+			index = index - 1;
+			repairLeaf(index);
+			return;
+		}
+		
+		if(hasRight && right_fill == -1) {
+			mergeRight(index);
+		} else if(hasRight && right_fill > 0) {
 			leafStealRightLeft(index);
 		} else if(hasLeft && left_fill > 0) {
 			leafStealLeftRight(index);
@@ -455,7 +462,6 @@ public class TreeNode{
 		}
 	}
 	
-	//TODO Remove fails at 63
 	//TODO change removeCopy - take out repairLeaf - predecessor calls it
 	//TODO predecessor call internal repair
 	//TODO remove removeCopy method

@@ -104,11 +104,8 @@ public class BTree {
 
 	public void remove(String x){
 		if(root.isEmpty()) {
-			TreeNode temp = root.links.get(0);
-			root = null;
-			this.setRoot(temp);
+			rootIsEmpty();
 		}
-		
 		if(root.keys.contains(x)) {
 			removeRoot(x);
 		} else if(contains(x)){
@@ -123,14 +120,20 @@ public class BTree {
 		int value_index;
 		String predecessor;
 		
+		//if i am a leaf 
 		if(root.isLeaf()){
+			//remove from me 
 			root.keys.remove(root.keys.indexOf(x));
 		} else {
+			//else get the index of the value to be removed
 			value_index = root.keys.indexOf(x);
+			//if i have a predecessor
 			if(root.hasPredecessor(value_index)) {
-				predecessor = root.getPredecessor(value_index);
+				//get the predecessor out of the root
+				predecessor = root.rootPredecessor(value_index);
+				//set predecessor into the root
 				root.keys.set(value_index, predecessor);  
-				//root.removeCopy(value_index);
+				repairTree(root);
 			} else {
 				root.links.remove(value_index);
 				root.keys.remove(value_index);
@@ -149,9 +152,14 @@ public class BTree {
 		valueNode = valueParent.getLinked(value);
 		value_position = valueParent.linkIndexSearch(value);
 		boolean value_leaf = valueNode.isLeaf();
+		
+		//if value node is a leaf
 		if(value_leaf){
+			//get the index of the value to be removed
 			value_index = valueNode.keys.indexOf(value);
+			//then remove the value out of value node at the index
 			valueNode.keys.remove(value_index);
+			//check to see that the node needs to be repaired
 			if(valueNode.fillStatus() == -1){
 				valueParent.repairLeaf(value_position);  
 			}
@@ -162,14 +170,19 @@ public class BTree {
 				//repairTree(node);
 				repairTree(valueParent);
 			}
+			//for debugging
 			if(predecessor == null) {
 				System.out.println("Null Predecessor for - " + value);
 			}
+			//if the value node does not have the value any more
+			//re-find the parent
+			//this is caused by the predecessor
 			if(!valueNode.keys.contains(value)) {
 				valueParent = findParent(value, node);
 				valueNode = valueParent.getLinked(value);
 				value_index = valueNode.keys.indexOf(value);
 			}
+			//add the predecessor to value node at the specified index
 			valueNode.keys.set(value_index, predecessor);  
 			//valueNode.removeCopy(value_index);
 		}
@@ -211,5 +224,10 @@ public class BTree {
 			ss = toString(ss, x.links.get(i));
 		}
 		return ss;
+	}
+	public void rootIsEmpty(){
+			TreeNode temp = root.links.get(0);
+			root = null;
+			this.setRoot(temp);
 	}
 }

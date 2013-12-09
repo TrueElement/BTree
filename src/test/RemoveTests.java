@@ -64,7 +64,7 @@ public class RemoveTests {
 	    int word_count;
 	    
 	    fill.newTree();
-	    word_count = fill.fillTree(592);
+	    word_count = fill.fillTree(600);
 	    words = fill.getWordsRead();
 	    tree = fill.getTree();
 	    
