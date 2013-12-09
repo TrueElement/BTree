@@ -113,7 +113,9 @@ public class TreeNode{
 			if(!current_link.isEmpty()) {
 				value = current_link.keys.get(current_link.keys.size() -1);
 				current_link.keys.remove(current_link.keys.size() - 1);
-				repairLeaf(index);
+				if(current_link.fillStatus() == -1) {
+					repairLeaf(index);
+				}
 			} 
 		} else {
 			next_link = current_link.links.size() -1;
@@ -121,7 +123,7 @@ public class TreeNode{
 				value = current_link.getPredecessor(next_link);
 			}
 		}
-		//System.out.println("Found Predecessor - " + value);
+		System.out.println("Found Predecessor - " + value);
 		return value;
 	}  
 
@@ -258,20 +260,7 @@ public class TreeNode{
 			toRepair.keys.add(parentValue);
 			toRepair.links.add(stolenLink); 
 	}
-//leaf merge
-	public void mergeLeft(int index) {
-		TreeNode toRemove, toFill; 
-		String parentValue; 
-			toRemove = links.get(index);
-			toFill = links.get(index - 1);
-			parentValue = keys.remove(index -1);
-			toFill.keys.add(parentValue);
 
-		for(String w : toRemove.keys){
-			toFill.keys.add(w);
-		}
-		links.remove(index);
-	}
 //leaf merge
 	public void mergeRight(int index) {
 		TreeNode toRemove, toFill; 
@@ -281,46 +270,83 @@ public class TreeNode{
 			parentValue = keys.remove(index);
 			toFill.keys.add(0,parentValue);
 
-		for(String w : toRemove.keys){
+		String w;
+		int i = 0;
+		while(!toRemove.keys.isEmpty()) {
+			i = toRemove.keys.size() - 1;
+			w = toRemove.keys.remove(i);
 			toFill.keys.add(0, w);
 		}
 		links.remove(index);
 	}
+	
 //internal merge
-	public void mergeLeftRightLink(int index) {
+	public void mergeRightLink(int index) {
 		TreeNode toRemove, toFill; 
 		String parentValue; 
-			toFill = links.get(index);
-			toRemove = links.get(index +1);
+			toRemove = links.get(index);
+			toFill = links.get(index + 1);
 			parentValue = keys.remove(index);
-			toFill.keys.add(parentValue); 
+			toFill.keys.add(0, parentValue); 
  
-		for(String w : toRemove.keys){
-			toFill.keys.add(w);
+
+		String w;
+		int i = 0;
+		while(!toRemove.keys.isEmpty()) {
+			i = toRemove.keys.size() - 1;
+			w = toRemove.keys.remove(i);
+			toFill.keys.add(0, w);
 		}
 
-		for(TreeNode l : toRemove.links){
-			toFill.links.add(l);
-		}
-		links.remove(index + 1);
-	}
-	// this is internal merge
-	public void mergeRightLeftLink(int index) {
-		TreeNode toRemove, toFill; 
-		String parentValue; 
-			toFill = links.get(index);
-			toRemove = links.get(index - 1);
-			parentValue = keys.remove(index - 1);
-			toFill.keys.add(0,parentValue); 
 
-		for(String w : toRemove.keys){
-			toFill.keys.add(0,w);
-		}
-
-		for(TreeNode l : toRemove.links){
+		TreeNode l;
+		while(!toRemove.links.isEmpty()){
+			i = toRemove.links.size() - 1;
+			l = toRemove.links.remove(i);
 			toFill.links.add(0, l);
 		}
-		links.remove(index - 1);
+		links.remove(index);
+	}
+	
+	//leaf merge
+	public void mergeLeft(int index) {
+		TreeNode toRemove, toFill; 
+		String parentValue; 
+			toRemove = links.get(index);
+			toFill = links.get(index - 1);
+			parentValue = keys.remove(index);
+			toFill.keys.add(parentValue);
+
+		String w;
+		while(!toRemove.keys.isEmpty()) {
+			w = toRemove.keys.remove(0);
+			toFill.keys.add(w);
+		}
+		links.remove(index);
+	}
+	
+	// this is internal merge
+	public void mergeLeftLink(int index) {
+		TreeNode toRemove, toFill; 
+		String parentValue;
+			toRemove = links.get(index);
+			toFill = links.get(index - 1);
+			parentValue = keys.remove(index);
+			toFill.keys.add(parentValue); 
+
+			String w;
+			while(!toRemove.keys.isEmpty()) {
+				w = toRemove.keys.remove(0);
+				toFill.keys.add(w);
+
+			}
+			
+			TreeNode l;
+			while(!toRemove.links.isEmpty()){
+				l = toRemove.links.remove(0);
+				toFill.links.add(l);
+			}
+		links.remove(index);
 	}
 
 	public void removeCopy(int index){
@@ -331,7 +357,7 @@ public class TreeNode{
 		current_link = links.get(index);
 		if(current_link.isLeaf()){
 			value = current_link.keys.remove(current_link.keys.size() -1);
-			//System.out.println("Link Copy Removed: " + value);
+			System.out.println("Link Copy Removed: " + value);
 			if(current_link.fillStatus() == -1){
 				repairLeaf(index);
 			}
@@ -396,9 +422,9 @@ public class TreeNode{
 		} else if(hasLeft && left_fill > 0) {
 			stealLeftRightLink(index);
 		} else if(hasRight && right_fill == 0) {
-			mergeRightLeftLink(index);
+			mergeRightLink(index);
 		} else if(hasLeft && left_fill == 0) {
-			mergeLeftRightLink(index);
+			mergeLeftLink(index);
 		}
 	}
 	
@@ -414,5 +440,6 @@ public class TreeNode{
 	//TODO change removeCopy - take out repairLeaf - predecessor calls it
 	//TODO predecessor call internal repair
 	//TODO remove removeCopy method
+	//TODO test remove reverse order
 	
 }

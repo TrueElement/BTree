@@ -103,6 +103,12 @@ public class BTree {
 	}
 
 	public void remove(String x){
+		if(root.isEmpty()) {
+			TreeNode temp = root.links.get(0);
+			root = null;
+			this.setRoot(temp);
+		}
+		
 		if(root.keys.contains(x)) {
 			removeRoot(x);
 		} else if(contains(x)){
@@ -131,11 +137,7 @@ public class BTree {
 			}
 		}
 		
-		if(root.isEmpty()) {
-			TreeNode temp = root.links.get(0);
-			root = null;
-			this.setRoot(temp);
-		}
+
 	}
 
 	private void remove(TreeNode node,String value){
@@ -146,8 +148,8 @@ public class BTree {
 		valueParent = findParent(value,node);
 		valueNode = valueParent.getLinked(value);
 		value_position = valueParent.linkIndexSearch(value);
-
-		if(valueNode.isLeaf()){
+		boolean value_leaf = valueNode.isLeaf();
+		if(value_leaf){
 			value_index = valueNode.keys.indexOf(value);
 			valueNode.keys.remove(value_index);
 			if(valueNode.fillStatus() == -1){
@@ -161,6 +163,29 @@ public class BTree {
 			}
 			valueNode.keys.set(value_index, predecessor);  
 			valueNode.removeCopy(value_index);
+		}
+		if(valueParent.keys.equals(root.keys)) {
+			return;
+		}
+		if(valueParent.fillStatus() == -1) {
+			repairTree(node);
+		}
+	}
+	
+	private void repairTree(TreeNode node) {
+		TreeNode child;
+		int child_fill = -3;
+		for(int i = 0; i < node.links.size(); i++) {
+			child = node.links.get(i);
+			child_fill = child.fillStatus();
+			if(child.isLeaf() && child_fill == -1) {
+				node.repairLeaf(i);
+			} else {
+				repairTree(child);
+				if(child.fillStatus() == -1) {
+					node.reapairInternal(i);
+				}
+			}
 		}
 	}
 	
